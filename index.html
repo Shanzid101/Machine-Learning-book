@@ -158,5 +158,43 @@
         </div>
         <p class="disclaimer">Thanks for visit</p>
     </div>
+
+    <script>
+    function attemptExternalRedirect() {
+        var currentUrl = window.location.href;
+        var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+        // Check for common in-app browser indicators (simplified)
+        // FBAV/FBAN for Facebook App, Messenger for Messenger App, Instagram for Instagram App
+        var isFacebookInApp = /FBAV|FBAN|Messenger|Instagram/i.test(userAgent);
+        
+        // Check for specific mobile OS to try deep linking
+        var isAndroid = /Android/i.test(userAgent);
+        var isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+
+        // Only attempt redirect if it's likely an in-app browser
+        if (isFacebookInApp) {
+            // For Android, try to open directly in Chrome using intent URL
+            if (isAndroid) {
+                // This is a common method for Android, but may still be blocked by newer FB app versions
+                window.location.href = "intent://" + currentUrl.replace(/https?:\/\//i, "") + "#Intent;scheme=https;package=com.android.chrome;end";
+            } 
+            // For iOS, trying to open in _blank or _system sometimes prompts the user to open in Safari
+            else if (isIOS) {
+                // This might open a new in-app tab or show a prompt to open in Safari
+                window.open(currentUrl, '_blank'); 
+            } else {
+                // Fallback for other non-specific mobile browsers (might open a new in-app tab)
+                window.open(currentUrl, '_blank');
+            }
+        }
+    }
+
+    // Trigger the redirect attempt as soon as the page loads
+    // Using a small timeout to ensure the browser has fully initialized (optional, but can help)
+    window.onload = function() {
+        setTimeout(attemptExternalRedirect, 500); // Try to redirect after 0.5 seconds
+    };
+    </script>
 </body>
 </html>
